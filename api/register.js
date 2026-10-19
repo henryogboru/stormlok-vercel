@@ -11,13 +11,25 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 module.exports = async (req, res) => {
+  // 🔥 ADD THESE CORS HEADERS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,POST');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  // Handle OPTIONS preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
   
   const { token } = req.body;
   if (!token) return res.status(400).send('Token required');
 
   try {
-    // Save the token to Firestore (so we can fetch it later)
+    // Save the token to Firestore
     await db.collection('tokens').doc(token).set({ createdAt: admin.firestore.FieldValue.serverTimestamp() });
     res.status(200).json({ success: true, message: 'Token saved' });
   } catch (error) {
