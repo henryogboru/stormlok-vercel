@@ -11,6 +11,17 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 module.exports = async (req, res) => {
+  // 🔥 ADD CORS HEADERS SO THE APP CAN TALK TO THIS ENDPOINT
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,GET');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  // Handle the browser's pre-flight check
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   try {
     // 1. Fetch weather for Asaba
     const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=6.2096&longitude=6.7011&current=cape,precipitation,weather_code`);
