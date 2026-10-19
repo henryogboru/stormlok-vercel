@@ -11,13 +11,12 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 module.exports = async (req, res) => {
-  // 🔥 ADD CORS HEADERS SO THE APP CAN TALK TO THIS ENDPOINT
+  // CORS headers so your app is allowed to make requests
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,GET');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  // Handle the browser's pre-flight check
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -48,12 +47,16 @@ module.exports = async (req, res) => {
           },
           tokens: tokens
         };
-        await admin.messaging().sendMulticast(message);
+        
+        // 🔥 FIX: Use sendEachForMulticast instead of sendMulticast
+        const response = await admin.messaging().sendEachForMulticast(message);
+        console.log(`Successfully sent ${response.successCount} messages.`);
       }
     }
     
     res.status(200).send(`Weather check complete. Score: ${Math.round(score)}`);
   } catch (error) {
+    console.error('Error sending push notification:', error);
     res.status(500).json({ error: error.message });
   }
 };
